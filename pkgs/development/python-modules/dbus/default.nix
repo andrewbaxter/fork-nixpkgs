@@ -26,7 +26,8 @@ buildPythonPackage rec {
     "PYTHON=${python.pythonForBuild.interpreter}"
   ];
 
-  nativeBuildInputs = [ pkg-config ];
+  # https://github.com/NixOS/nixpkgs/issues/309395
+  nativeBuildInputs = [ dbus pkg-config ];
   buildInputs = [ dbus dbus-glib ]
     # My guess why it's sometimes trying to -lncurses.
     # It seems not to retain the dependency anyway.

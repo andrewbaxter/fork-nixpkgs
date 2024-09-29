@@ -5,7 +5,7 @@
 , aften, AudioUnit, CoreAudio, libobjc, Accelerate
 
 # Optional Dependencies
-, dbus ? null, libffado ? null, alsa-lib ? null
+, dbus ? null, alsa-lib ? null
 , libopus ? null
 
 # Extra options
@@ -22,7 +22,6 @@ let
 
   optDbus = if stdenv.isDarwin then null else shouldUsePkg dbus;
   optPythonDBus = if libOnly then null else shouldUsePkg dbus-python;
-  optLibffado = if libOnly then null else shouldUsePkg libffado;
   optAlsaLib = if libOnly then null else shouldUsePkg alsa-lib;
   optLibopus = shouldUsePkg libopus;
 in
@@ -41,7 +40,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   nativeBuildInputs = [ pkg-config python makeWrapper wafHook ];
   buildInputs = [ libsamplerate libsndfile readline eigen celt
-    optDbus optPythonDBus optLibffado optAlsaLib optLibopus
+    optDbus optPythonDBus optAlsaLib optLibopus
   ] ++ lib.optionals stdenv.isDarwin [
     aften AudioUnit CoreAudio Accelerate libobjc
   ];
@@ -52,11 +51,11 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   dontAddWafCrossFlags = true;
+  # Override to remove ffado dep (firewire, pulls in qt) due to https://github.com/NixOS/nixpkgs/issues/269756
   wafConfigureFlags = [
     "--classic"
     "--autostart=${if (optDbus != null) then "dbus" else "classic"}"
   ] ++ lib.optional (optDbus != null) "--dbus"
-    ++ lib.optional (optLibffado != null) "--firewire"
     ++ lib.optional (optAlsaLib != null) "--alsa";
 
   postInstall = (if libOnly then ''
